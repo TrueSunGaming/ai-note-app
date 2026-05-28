@@ -1,0 +1,12 @@
+@use "@fontsource-variable/inter";
+@use "@fontsource-variable/jetbrains-mono";
+
+$code-selectors: ("code", "pre");
+
+#{$code-selectors} {
+    font-family: "JetBrains Mono Variable", monospace;
+}
+
+:not(#{$code-selectors}) {
+    font-family: "Inter Variable", sans-serif;
+}

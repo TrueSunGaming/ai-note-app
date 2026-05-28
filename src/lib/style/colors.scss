@@ -1,0 +1,19 @@
+@use "sass:color";
+
+@mixin color-lightness($name, $base, $variant-count, $lightness-step) {
+    @for $i from 0 through $variant-count {
+        --color-#{$name}-#{$i}: #{color.adjust($base, $lightness: $i * $lightness-step, $space: oklch)};
+    }
+    --color-#{$name}: var(--color-#{$name}-0);
+}
+
+:root {
+    @include color-lightness("primary", hsl(0, 0%, 10%), 5, 10%);
+    @include color-lightness("secondary", hsl(205, 100%, 10%), 5, 10%);
+    @include color-lightness("text", hsl(0, 0%, 85%), 1, -30%);
+}
+
+body {
+    background-color: var(--color-primary);
+    color: var(--color-text);
+}
