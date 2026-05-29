@@ -2,7 +2,11 @@
 
 @mixin color-lightness($name, $base, $variant-count, $lightness-step) {
     @for $i from 0 through $variant-count {
-        --color-#{$name}-#{$i}: #{color.adjust($base, $lightness: $i * $lightness-step, $space: oklch)};
+        --color-#{$name}-#{$i}: #{color.adjust(
+                $base,
+                $lightness: $i * $lightness-step,
+                $space: oklch
+            )};
     }
     --color-#{$name}: var(--color-#{$name}-0);
 }

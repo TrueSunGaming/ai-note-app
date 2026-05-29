@@ -40,7 +40,8 @@
     transition-duration: 50ms;
     cursor: pointer;
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
         &.primary {
             background-color: var(--color-primary-3);
         }
