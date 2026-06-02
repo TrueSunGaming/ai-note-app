@@ -10,13 +10,6 @@
 
     let richText: RichText | undefined = $state();
 
-    let pendingUpdate: (() => void) | undefined = $state();
-
-    $effect(() => {
-        pendingUpdate?.();
-        pendingUpdate = undefined;
-    });
-
     let beforeCaretPos: number;
 </script>
 
@@ -28,7 +21,7 @@
             if (pos === null) throw new Error("Failed to get caret position");
             beforeCaretPos = pos;
         }}
-        oninput={() => (pendingUpdate = richText?.generateNewRaw(beforeCaretPos))}
+        oninput={() => richText?.generateNewRaw(beforeCaretPos)}
     >
         <RichText bind:raw={$text} bind:this={richText} />
     </p>

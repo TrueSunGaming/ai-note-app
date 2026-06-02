@@ -26,7 +26,7 @@
         renderingRaw = raw;
     });
 
-    export function generateNewRaw(caretPos: number): (() => void) | undefined {
+    export function generateNewRaw(caretPos: number): void {
         const caret = findCharInStructure(structure, caretPos);
         if (!caret) return;
         console.log(caret, caret[0].children[caret[1]]);
