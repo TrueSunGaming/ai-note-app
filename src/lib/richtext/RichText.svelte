@@ -21,7 +21,8 @@
         const activeTextNode = getActiveTextNode();
         if (!activeTextNode) return;
 
-        const afterText = activeTextNode.textContent;
+        // svelte-check thinks this is string | null but its just string
+        const afterText = activeTextNode.textContent!;
         caret[0].children[caret[1]] = afterText;
 
         raw = stringifyRichTextStructure(structure);

@@ -1,6 +1,6 @@
 import type { Action } from "svelte/action";
-import { newLine } from "./newLine";
 import type { DocumentData } from "../DocumentData";
+import { newLine } from "./newLine";
 import { undoRedoShortcut } from "./undoRedoShortcut";
 
 type DocEventCallback<T extends Event> = (
@@ -13,7 +13,7 @@ const keyDownCallbacks: DocEventCallback<KeyboardEvent>[] = [newLine, undoRedoSh
 
 export const events: Action<HTMLElement, DocumentData> = (node, doc) => {
     $effect(() => {
-        const keyDownListener = (event: KeyboardEvent) => {
+        const keyDownListener = (event: KeyboardEvent): void => {
             for (const i of keyDownCallbacks) {
                 const result = i(event, node, doc);
                 if (result) return;

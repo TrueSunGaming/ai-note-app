@@ -2,7 +2,6 @@
     import type { BlockComponentProps } from "../BlockComponent";
     import RichText from "../../../richtext/RichText.svelte";
     import { TextBlockData } from "./TextBlockData";
-    import { events } from "$lib/document/events/events.svelte";
     import { getActiveTextNode } from "$lib/util/getActiveTextNode";
     import { getCaretPos } from "$lib/util/caret/getCaretPos";
 
