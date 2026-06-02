@@ -17,7 +17,7 @@
 
     <div>
         {#each $blocks as blockData (blockData.uuid)}
-            <Block {blockData} />
+            <Block {blockData} {doc} />
         {/each}
     </div>
 </article>

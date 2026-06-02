@@ -21,6 +21,8 @@ export abstract class BlockData implements DocumentSerializable {
     abstract readonly raw: Readable<unknown>;
     abstract readonly markdown: Readable<string>;
 
+    cancelHistory = 0;
+
     loadFromRaw(raw: unknown): void {
         const errorMessage = `Failed to load ${this.constructor.name}: `;
 

@@ -10,6 +10,10 @@
 
     onMount(() => {
         document.addEventListener("paste", rawPaste);
+
+        return () => {
+            document.removeEventListener("paste", rawPaste);
+        };
     });
 </script>
 

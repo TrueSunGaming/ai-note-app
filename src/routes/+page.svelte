@@ -8,7 +8,7 @@
         blocks: [
             {
                 type: "text",
-                text: "Hello, world!"
+                text: "Hello, <color red>wo<italic>rl</>d</><bold>!</>"
             }
         ]
     });

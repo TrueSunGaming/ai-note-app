@@ -1,5 +1,6 @@
-import { type Readable, type Writable, derived, writable } from "svelte/store";
+import { type Readable, type Writable, derived, get, writable } from "svelte/store";
 import { BlockData } from "./block/BlockData";
+import { DocumentHistory } from "./history/DocumentHistory";
 import type { DocumentSerializable } from "./DocumentSerializable";
 import { filterNullish } from "$lib/util/filterNullish";
 import { v4 as uuidv4 } from "uuid";
@@ -10,11 +11,19 @@ export interface RawDocument {
     blocks: unknown[];
 }
 
+export interface DocumentPendingSelection {
+    uuid: string;
+    callback: () => void;
+}
+
 export class DocumentData implements DocumentSerializable {
     readonly uuid: string;
 
-    title: Writable<string>;
-    blocks: Writable<BlockData[]> = writable([]);
+    readonly title: Writable<string>;
+    readonly blocks: Writable<BlockData[]> = writable([]);
+
+    pendingSelection: DocumentPendingSelection | null = null;
+    readonly history = new DocumentHistory();
 
     constructor(title = "Untitled Document", uuid = uuidv4()) {
         this.title = writable(title);
@@ -45,7 +54,7 @@ export class DocumentData implements DocumentSerializable {
             [this.title, this.blocks],
             ([title, blocks], set) => {
                 const blockMarkdownStores = blocks.map((b) => b.markdown);
-                const blockMarkdown = derived(blockMarkdownStores, (md) => md.join("\n"));
+                const blockMarkdown = derived(blockMarkdownStores, (md) => md.join("\n\n"));
 
                 blockMarkdown.subscribe(($blockMarkdown) => {
                     set(`# ${title}\n---\n\n${$blockMarkdown}`);
@@ -85,5 +94,40 @@ export class DocumentData implements DocumentSerializable {
 
     static fromJSON(json: string): DocumentData {
         return DocumentData.fromRaw(JSON.parse(json));
+    }
+
+    getBlockFromUUID(uuid: string): BlockData | undefined {
+        return get(this.blocks).find((b) => b.uuid == uuid);
+    }
+
+    private static getBlockIndex(blocks: BlockData[], block: BlockData | number): number | null {
+        if (typeof block == "number") {
+            if (block >= 0) return block;
+            return blocks.length + block;
+        }
+
+        const found = blocks.indexOf(block);
+        return found == -1 ? null : found;
+    }
+
+    addBlock(block: BlockData, after: BlockData | number = -1): void {
+        this.blocks.update((blocks) => {
+            const index = DocumentData.getBlockIndex(blocks, after) ?? blocks.length - 1;
+
+            const newBlocks = [...blocks];
+            newBlocks.splice(index + 1, 0, block);
+            return newBlocks;
+        });
+    }
+
+    removeBlock(block: BlockData | number): void {
+        this.blocks.update((blocks) => {
+            const index = DocumentData.getBlockIndex(blocks, block);
+            if (index == null) return blocks;
+
+            const newBlocks = [...blocks];
+            newBlocks.splice(index, 1);
+            return newBlocks;
+        });
     }
 }

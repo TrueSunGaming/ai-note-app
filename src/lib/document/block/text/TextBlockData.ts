@@ -1,6 +1,7 @@
 import { type Readable, type Writable, derived, get, writable } from "svelte/store";
 import { BlockData } from "../BlockData";
 import TextBlock from "./TextBlock.svelte";
+import { richTextToMarkdown } from "$lib/richtext/RichTextStructure";
 
 export interface RawTextBlock {
     type: "text";
@@ -14,7 +15,7 @@ export class TextBlockData extends BlockData {
 
     override readonly type = "text";
 
-    text: Writable<string> = writable("");
+    readonly text: Writable<string> = writable("");
 
     override copy(): TextBlockData {
         const copy = new TextBlockData();
@@ -36,6 +37,6 @@ export class TextBlockData extends BlockData {
     }
 
     get markdown(): Readable<string> {
-        return derived(this.text, (text) => text);
+        return derived(this.text, (text) => richTextToMarkdown(text));
     }
 }
