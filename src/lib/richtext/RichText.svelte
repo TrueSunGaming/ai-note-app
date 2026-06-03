@@ -29,13 +29,13 @@
     export function generateNewRaw(caretPos: number): void {
         const caret = findCharInStructure(structure, caretPos);
         if (!caret) return;
-        console.log(caret, caret[0].children[caret[1]]);
+        const [updateStruct, updateChild] = caret;
 
         const activeTextNode = getActiveTextNode();
         if (!activeTextNode) return;
 
         // svelte-check thinks this is string | null but its just string
-        caret[0].children[caret[1]] = activeTextNode.textContent!;
+        updateStruct.children[updateChild] = activeTextNode.textContent!;
 
         cancelUpdates++;
         raw = stringifyRichTextStructure(structure);
