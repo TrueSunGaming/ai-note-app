@@ -2,7 +2,7 @@
     import "./feature/loadFeatures";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
-    import { findCharInStructure } from "./findCharInStructure";
+    import { findCharInStructure } from "./editor-util/findCharInStructure";
     import { getActiveTextNode } from "$lib/util/getActiveTextNode";
     import { setCaretPos } from "$lib/util/caret/setCaretPos";
     import { untrack } from "svelte";
@@ -12,6 +12,31 @@
     }
 
     let { raw = $bindable() }: Props = $props();
+
+    let element: HTMLSpanElement | null = $state(null);
+
+    function addCancelUpdate(): void {
+        cancelUpdates++;
+    }
+
+    function updateRaw(): void {
+        console.log("hi");
+        raw = element!.getAttribute("data-richtext-raw")!;
+    }
+
+    $effect(() => {
+        if (element == null) return;
+
+        const el = element;
+
+        el.addEventListener("updateRaw", updateRaw);
+        el.addEventListener("cancelUpdate", addCancelUpdate);
+
+        return () => {
+            el.removeEventListener("updateRaw", updateRaw);
+            el.removeEventListener("cancelUpdate", addCancelUpdate);
+        };
+    });
 
     let cancelUpdates = 0;
     let renderingRaw = $state("");
@@ -42,4 +67,6 @@
     }
 </script>
 
-<RichTextFeature tag={structure.tag} bind:children={structure.children} />
+<span bind:this={element} data-richtext-raw={raw}>
+    <RichTextFeature tag={structure.tag} bind:children={structure.children} />
+</span>

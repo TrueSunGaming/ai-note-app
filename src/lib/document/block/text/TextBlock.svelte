@@ -2,9 +2,10 @@
     import type { BlockComponentProps } from "../BlockComponent";
     import RichText from "../../../richtext/RichText.svelte";
     import { TextBlockData } from "./TextBlockData";
+    import { events } from "$lib/document/events/events.svelte";
     import { getCaretPos } from "$lib/util/caret/getCaretPos";
 
-    const { blockData }: BlockComponentProps = $props();
+    const { blockData, doc }: BlockComponentProps = $props();
 
     const text = $derived(blockData instanceof TextBlockData ? blockData.text : undefined);
 
@@ -22,6 +23,8 @@
             beforeCaretPos = pos;
         }}
         oninput={() => richText?.generateNewRaw(beforeCaretPos)}
+        data-uuid={blockData.uuid}
+        use:events={doc}
     >
         <RichText bind:raw={$text} bind:this={richText} />
     </p>

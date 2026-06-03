@@ -1,51 +1,42 @@
 import { BlockData } from "../block/BlockData";
 import type { DocumentData } from "../DocumentData";
+import type { TextBlockData } from "../block/text/TextBlockData";
+import { getCaretPos } from "$lib/util/caret/getCaretPos";
+import { getRichTextFromElement } from "$lib/richtext/editor-util/getRichTextFromElement";
+import { getUUIDFromElement } from "../block/getUUIDFromElement";
 import { moveCaretToStart } from "$lib/util/caret/moveCaretToStart";
-import { updateInnerText } from "$lib/util/updateInnerText";
+import { setRichTextOfElement } from "$lib/richtext/editor-util/setRichTextOfElement";
+import { splitRichText } from "$lib/richtext/editor-util/findCharInRaw";
 
 export function newLine(event: KeyboardEvent, node: HTMLElement, doc: DocumentData): void {
     if (event.code != "Enter" || event.shiftKey) return;
     event.preventDefault();
 
-    const selection = window.getSelection();
-    if (!selection?.rangeCount) return;
+    const raw = getRichTextFromElement(node, true);
+    if (raw == null) return;
 
-    const range = selection.getRangeAt(0);
+    const caretPos = getCaretPos();
+    if (caretPos == null) return;
+    const [originalCut, newLine] = splitRichText(raw, caretPos);
 
-    const testRange = document.createRange();
-    testRange.selectNodeContents(node);
-    testRange.setStart(range.endContainer, range.endOffset);
-
-    const nextLineText = testRange.toString().trim();
-    const block = doc.getBlockFromUUID(node.getAttribute("data-uuid")!);
-    if (!block) return console.error("newLine: Failed to get block");
+    const block = doc.getBlockFromUUID(getUUIDFromElement(node)!);
 
     const newBlock = BlockData.fromRaw({
         type: "text",
-        text: nextLineText
-    })!;
+        text: newLine
+    })! as TextBlockData;
 
-    const copyRange = range.cloneRange();
+    doc.addBlock(newBlock, block);
+    setRichTextOfElement(node, originalCut);
 
-    doc.history.pushAction({
-        do: () => {
-            doc.addBlock(newBlock, block);
-
-            block.cancelHistory++;
-            updateInnerText(node, node.innerText.slice(0, copyRange.startOffset));
-
-            doc.pendingSelection = {
-                uuid: newBlock.uuid,
-                callback: () => {
-                    const newElement = document.querySelector<HTMLElement>(
-                        `[data-uuid="${newBlock.uuid}"]`
-                    );
-                    if (!newElement) throw new Error("newLine: Failed to get new element");
-                    moveCaretToStart(newElement);
-                }
-            };
-        },
-        // TODO: implement undo
-        undo: () => {}
-    });
+    doc.pendingSelection = {
+        uuid: newBlock.uuid,
+        callback: () => {
+            const newElement = document.querySelector<HTMLElement>(
+                `[data-uuid="${newBlock.uuid}"]`
+            );
+            if (!newElement) throw new Error("newLine: Failed to get new element");
+            moveCaretToStart(newElement);
+        }
+    };
 }

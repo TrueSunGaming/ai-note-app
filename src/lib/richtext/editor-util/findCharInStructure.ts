@@ -1,4 +1,4 @@
-import type { RichTextStructure } from "./RichTextStructure";
+import type { RichTextStructure } from "../RichTextStructure";
 
 export function findCharInStructure(
     structure: RichTextStructure,

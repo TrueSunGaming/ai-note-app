@@ -27,12 +27,12 @@ export function richTextToStructure(raw: string): RichTextStructure {
 
     let idx = 0;
     while (idx < raw.length) {
-        const untilNextTag = raw.slice(idx).match(untilNextTagRegex)?.[0] ?? "";
+        const untilNextTag = raw.slice(idx).match(untilNextTagRegex)?.[0] ?? raw;
         if (untilNextTag.length > 0) addingTo.at(-1)!.children.push(unescapeRichText(untilNextTag));
         idx += untilNextTag.length + 1;
 
         const newTagName = raw.slice(idx).match(newTagNameRegex)?.[0] ?? "";
-        if (newTagName.length == 0) throw new Error("Expected tag name");
+        if (newTagName.length == 0) continue;
         idx += newTagName.length + 1;
 
         if (newTagName == "/") {
@@ -51,9 +51,9 @@ export function richTextToStructure(raw: string): RichTextStructure {
         openedTags++;
     }
 
-    console.log(openedTags);
     if (openedTags != 0) throw new Error("Unclosed tags");
 
+    console.log(raw, result);
     return result;
 }
 
@@ -83,4 +83,14 @@ export function richTextStructureToMarkdown(structure: RichTextStructure): strin
 
 export function richTextToMarkdown(raw: string): string {
     return richTextStructureToMarkdown(richTextToStructure(raw));
+}
+
+const richTextTagRegex = /(?<=(?<!\\)(?:\\\\)*)<[^>]*>/g;
+
+export function matchRichTextTags(raw: string): RegExpExecArray[] {
+    return Array.from(raw.matchAll(richTextTagRegex));
+}
+
+export function richTextToPlain(raw: string): string {
+    return unescapeRichText(raw.replaceAll(richTextTagRegex, ""));
 }
