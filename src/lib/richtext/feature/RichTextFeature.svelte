@@ -9,14 +9,14 @@
     }
 
     // eslint-disable-next-line prefer-const
-    let { tag, children = $bindable() }: Props = $props();
+    let { tag, children }: Props = $props();
     const FeatureComponent = $derived(RichTextFeatureData.findMatch(tag)?.component);
 </script>
 
 {#if FeatureComponent !== undefined}
     <FeatureComponent {tag}>
-        <RichTextChildren bind:children />
+        <RichTextChildren {children} />
     </FeatureComponent>
 {:else}
-    &lt;{tag}&gt;<RichTextChildren bind:children />&lt;/&gt;
+    &lt;{tag}&gt;<RichTextChildren {children} />&lt;/&gt;
 {/if}

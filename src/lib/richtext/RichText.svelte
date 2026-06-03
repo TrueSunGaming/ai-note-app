@@ -51,6 +51,9 @@
         renderingRaw = raw;
     });
 
+    /* FIXME: shift+enter splits the text node into 2 nodes separated by <br>
+    this replaces the structure with the content from the second node
+    newLine also breaks with shift+enter */
     export function generateNewRaw(caretPos: number): void {
         const caret = findCharInStructure(structure, caretPos);
         if (!caret) return;
@@ -68,5 +71,5 @@
 </script>
 
 <span bind:this={element} data-richtext-raw={raw}>
-    <RichTextFeature tag={structure.tag} bind:children={structure.children} />
+    <RichTextFeature tag={structure.tag} children={structure.children} />
 </span>
