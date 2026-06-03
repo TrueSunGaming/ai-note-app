@@ -2,8 +2,8 @@
     import "./feature/loadFeatures";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
-    import { getTextAtPath } from "./editor-util/getTextAtPath";
-    import { setTextAtPath } from "./editor-util/setTextAtPath";
+    import { getTextAtPath } from "./path/getTextAtPath";
+    import { setTextAtPath } from "./path/setTextAtPath";
 
     interface Props {
         raw: string;
