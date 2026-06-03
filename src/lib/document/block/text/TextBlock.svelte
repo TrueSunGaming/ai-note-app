@@ -3,7 +3,7 @@
     import RichText from "../../../richtext/RichText.svelte";
     import { TextBlockData } from "./TextBlockData";
     import { events } from "$lib/document/events/events.svelte";
-    import { getCaretPos } from "$lib/util/caret/getCaretPos";
+    import { getActiveTextNode } from "$lib/util/getActiveTextNode";
 
     const { blockData, doc }: BlockComponentProps = $props();
 
@@ -11,18 +11,20 @@
 
     let richText: RichText | undefined = $state();
 
-    let beforeCaretPos: number;
+    let activeBefore: Text | null = null;
 </script>
 
 {#if $text !== undefined}
     <p
         contenteditable
         onbeforeinput={() => {
-            const pos = getCaretPos();
-            if (pos === null) throw new Error("Failed to get caret position");
-            beforeCaretPos = pos;
+            // const pos = getCaretPos();
+            // if (pos === null) throw new Error("Failed to get caret position");
+            // beforeCaretPos = pos;
+
+            activeBefore = getActiveTextNode();
         }}
-        oninput={() => richText?.generateNewRaw(beforeCaretPos)}
+        oninput={() => richText?.generateNewRaw(activeBefore)}
         data-uuid={blockData.uuid}
         use:events={doc}
     >

@@ -5,8 +5,8 @@ export interface RichTextStructure {
     children: (string | RichTextStructure)[];
 }
 
-const untilNextTagRegex = /^(.*?(?<!\\)(?:\\\\)*(?=<))/;
-const newTagNameRegex = /^(.*?(?<!\\)(?:\\\\)*(?=>))/;
+const untilNextTagRegex = /^(.*?(?<!\\)(?:\\\\)*(?=<))/s;
+const newTagNameRegex = /^(.*?(?<!\\)(?:\\\\)*(?=>))/s;
 
 function unescapeRichText(raw: string): string {
     return raw.replaceAll("\\\\", "\\").replaceAll("\\<", "<").replaceAll("\\>", ">");
@@ -51,9 +51,8 @@ export function richTextToStructure(raw: string): RichTextStructure {
         openedTags++;
     }
 
-    if (openedTags != 0) throw new Error("Unclosed tags");
+    if (openedTags != 0) throw new Error(`${openedTags} unclosed tags in ${raw}`);
 
-    console.log(raw, result);
     return result;
 }
 
@@ -68,13 +67,13 @@ export function stringifyRichTextStructure(structure: RichTextStructure): string
 
 export function richTextStructureToMarkdown(structure: RichTextStructure): string {
     const feature = RichTextFeatureData.findMatch(structure.tag);
-    if (!feature) return "(rich text failed to render)";
+    if (!feature) return `<failed to render tag '${structure.tag}'>`;
 
     return feature.toMarkdown(
         structure.tag,
         structure.children
             .map((child) => {
-                if (typeof child == "string") return escapeRichText(child);
+                if (typeof child == "string") return escapeRichText(child).replaceAll("\n", "\\\n");
                 return richTextStructureToMarkdown(child);
             })
             .join("")

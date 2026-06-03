@@ -5,7 +5,6 @@ export abstract class RichTextFeatureData {
 
     constructor() {
         RichTextFeatureData.registry.push(this);
-        console.log(RichTextFeatureData.registry);
     }
 
     abstract readonly component: RichTextFeatureComponent;

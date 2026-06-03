@@ -6,17 +6,18 @@
     interface Props {
         tag: string;
         children: (string | RichTextStructure)[];
+        idxPath?: string;
     }
 
     // eslint-disable-next-line prefer-const
-    let { tag, children }: Props = $props();
+    let { tag, children, idxPath = "" }: Props = $props();
     const FeatureComponent = $derived(RichTextFeatureData.findMatch(tag)?.component);
 </script>
 
 {#if FeatureComponent !== undefined}
     <FeatureComponent {tag}>
-        <RichTextChildren {children} />
+        <RichTextChildren {children} {idxPath} />
     </FeatureComponent>
 {:else}
-    &lt;{tag}&gt;<RichTextChildren {children} />&lt;/&gt;
+    &lt;{tag}&gt;<RichTextChildren {children} {idxPath} />&lt;/&gt;
 {/if}

@@ -6,7 +6,7 @@ import { getRichTextFromElement } from "$lib/richtext/editor-util/getRichTextFro
 import { getUUIDFromElement } from "../block/getUUIDFromElement";
 import { moveCaretToStart } from "$lib/util/caret/moveCaretToStart";
 import { setRichTextOfElement } from "$lib/richtext/editor-util/setRichTextOfElement";
-import { splitRichText } from "$lib/richtext/editor-util/findCharInRaw";
+import { splitRichText } from "$lib/richtext/editor-util/splitRichText";
 
 export function newLine(event: KeyboardEvent, node: HTMLElement, doc: DocumentData): void {
     if (event.code != "Enter" || event.shiftKey) return;

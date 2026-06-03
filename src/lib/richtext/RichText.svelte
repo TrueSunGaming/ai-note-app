@@ -2,10 +2,8 @@
     import "./feature/loadFeatures";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
-    import { findCharInStructure } from "./editor-util/findCharInStructure";
-    import { getActiveTextNode } from "$lib/util/getActiveTextNode";
-    import { setCaretPos } from "$lib/util/caret/setCaretPos";
-    import { untrack } from "svelte";
+    import { getTextAtPath } from "./editor-util/getTextAtPath";
+    import { setTextAtPath } from "./editor-util/setTextAtPath";
 
     interface Props {
         raw: string;
@@ -20,7 +18,6 @@
     }
 
     function updateRaw(): void {
-        console.log("hi");
         raw = element!.getAttribute("data-richtext-raw")!;
     }
 
@@ -43,6 +40,8 @@
     const structure = $derived(richTextToStructure(renderingRaw));
 
     $effect(() => {
+        const newRaw = raw; // force svelte to actually watch this
+
         if (cancelUpdates > 0) {
             cancelUpdates--;
             return;
@@ -51,25 +50,44 @@
         renderingRaw = raw;
     });
 
-    /* FIXME: shift+enter splits the text node into 2 nodes separated by <br>
-    this replaces the structure with the content from the second node
-    newLine also breaks with shift+enter */
-    export function generateNewRaw(caretPos: number): void {
-        const caret = findCharInStructure(structure, caretPos);
-        if (!caret) return;
-        const [updateStruct, updateChild] = caret;
-
-        const activeTextNode = getActiveTextNode();
-        if (!activeTextNode) return;
-
-        // svelte-check thinks this is string | null but its just string
-        updateStruct.children[updateChild] = activeTextNode.textContent!;
-
+    function updateRawWithoutDOM(): void {
         cancelUpdates++;
         raw = stringifyRichTextStructure(structure);
+    }
+
+    // TODO: handle some deletes by checking if activeBefore still exists
+    export function generateNewRaw(activeBefore: Text | null): void {
+        // const activeTextNode = getActiveTextNode();
+        // if (!activeTextNode) return;
+
+        if (!activeBefore) return;
+
+        const textElement = activeBefore.parentElement;
+        if (!textElement) return;
+
+        const path = textElement.getAttribute("data-richtext-idx-path");
+        if (path == null) return;
+
+        const existingText = getTextAtPath(structure, path);
+        const newText = textElement.innerText;
+
+        if (newText == existingText) {
+            // assume shift+enter
+            setTextAtPath(structure, path, "\n" + existingText);
+        } else {
+            setTextAtPath(structure, path, textElement.innerText);
+        }
+
+        updateRawWithoutDOM();
     }
 </script>
 
 <span bind:this={element} data-richtext-raw={raw}>
-    <RichTextFeature tag={structure.tag} children={structure.children} />
+    <RichTextFeature {...structure} />
 </span>
+
+<style lang="scss">
+    span {
+        white-space: pre;
+    }
+</style>
