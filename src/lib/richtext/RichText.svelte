@@ -2,7 +2,9 @@
     import "./feature/loadFeatures";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
+    import { deletePath } from "./path/deletePath";
     import { getTextAtPath } from "./path/getTextAtPath";
+    import { onMount } from "svelte";
     import { setTextAtPath } from "./path/setTextAtPath";
 
     interface Props {
@@ -19,11 +21,11 @@
 
     function updateRaw(): void {
         raw = element!.getAttribute("data-richtext-raw")!;
+        console.log("updateRaw", raw);
     }
 
-    $effect(() => {
+    onMount(() => {
         if (element == null) return;
-
         const el = element;
 
         el.addEventListener("updateRaw", updateRaw);
@@ -55,31 +57,99 @@
         raw = stringifyRichTextStructure(structure);
     }
 
-    // TODO: handle some deletes by checking if activeBefore still exists
-    export function generateNewRaw(activeBefore: Text | null): void {
-        // const activeTextNode = getActiveTextNode();
-        // if (!activeTextNode) return;
+    function handleAttributesMutation(mutation: MutationRecord): void {}
 
-        if (!activeBefore) return;
+    function handleRemovedFilter(node: Node): boolean {
+        if (node.nodeType == Node.COMMENT_NODE) return false;
+        if (node.nodeType == Node.TEXT_NODE && (node.textContent?.length ?? 0) == 0) return false;
+        return true;
+    }
 
-        const textElement = activeBefore.parentElement;
-        if (!textElement) return;
+    function handleRemovedNodes(mutation: MutationRecord): void {
+        const removed = Array.from(mutation.removedNodes).filter(handleRemovedFilter);
+        if (removed.length == 0) return;
 
-        const path = textElement.getAttribute("data-richtext-idx-path");
-        if (path == null) return;
+        const removedPathElements = removed.flatMap((n) => {
+            if (!(n instanceof Element)) return [];
+            if (n.hasAttribute("data-richtext-idx-path")) return n;
+            return Array.from(n.querySelectorAll("[data-richtext-idx-path]"));
+        });
 
-        const existingText = getTextAtPath(structure, path);
-        const newText = textElement.innerText;
-
-        if (newText == existingText) {
-            // assume shift+enter
-            setTextAtPath(structure, path, "\n" + existingText);
-        } else {
-            setTextAtPath(structure, path, textElement.innerText);
-        }
+        for (const i of removedPathElements)
+            deletePath(structure, i.getAttribute("data-richtext-idx-path")!);
 
         updateRawWithoutDOM();
     }
+
+    function handleAddedNodes(mutation: MutationRecord): void {
+        const addedText = Array.from(mutation.addedNodes).filter((n) => n instanceof Text);
+
+        const prevSibling = mutation.previousSibling;
+        if (!prevSibling) return;
+
+        const prevElement = prevSibling.parentElement;
+        if (!prevElement) return;
+
+        const path = prevElement.getAttribute("data-richtext-idx-path");
+        if (!path) return;
+
+        const originalText = getTextAtPath(structure, path);
+        setTextAtPath(
+            structure,
+            path,
+            originalText + addedText.map((t) => t.textContent ?? "").join("")
+        );
+        updateRawWithoutDOM();
+    }
+
+    function handleChildListMutation(mutation: MutationRecord): void {
+        handleRemovedNodes(mutation);
+        handleAddedNodes(mutation);
+    }
+
+    function handleCharacterDataMutation(mutation: MutationRecord): void {
+        const mutatedElement = mutation.target.parentElement;
+        if (!mutatedElement) return;
+
+        const path = mutatedElement.getAttribute("data-richtext-idx-path");
+        if (!path) return;
+
+        setTextAtPath(structure, path, mutatedElement.textContent ?? "");
+        updateRawWithoutDOM();
+    }
+
+    function handleMutation(mutation: MutationRecord): void {
+        console.log(mutation);
+
+        switch (mutation.type) {
+            case "attributes":
+                handleAttributesMutation(mutation);
+                break;
+            case "childList":
+                handleChildListMutation(mutation);
+                break;
+            case "characterData":
+                handleCharacterDataMutation(mutation);
+                break;
+        }
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) handleMutation(mutation);
+    });
+
+    onMount(() => {
+        if (element == null) return;
+
+        observer.observe(element, {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+
+        return () => observer.disconnect();
+    });
 </script>
 
 <span bind:this={element} data-richtext-raw={raw}>
