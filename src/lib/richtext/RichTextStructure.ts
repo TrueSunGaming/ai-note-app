@@ -60,6 +60,7 @@ export function stringifyRichTextStructure(structure: RichTextStructure): string
     return structure.children
         .map((child) => {
             if (typeof child == "string") return escapeRichText(child);
+            if (child.children.every((c) => !c)) return "";
             return `<${child.tag}>${stringifyRichTextStructure(child)}</>`;
         })
         .join("");
