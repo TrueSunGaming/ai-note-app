@@ -1,4 +1,4 @@
-import type { RichTextStructure } from "../RichTextStructure";
+import type { RichTextStructure } from "../../RichTextStructure";
 import { traversePath } from "./traversePath";
 
 export function setTextAtPath(structure: RichTextStructure, path: string, content: string): void {

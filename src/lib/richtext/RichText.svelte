@@ -2,10 +2,10 @@
     import "./feature/loadFeatures";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
-    import { deletePath } from "./path/deletePath";
-    import { getTextAtPath } from "./path/getTextAtPath";
+    import { deletePath } from "./editor-util/path/deletePath";
+    import { getTextAtPath } from "./editor-util/path/getTextAtPath";
     import { onMount } from "svelte";
-    import { setTextAtPath } from "./path/setTextAtPath";
+    import { setTextAtPath } from "./editor-util/path/setTextAtPath";
 
     interface Props {
         raw: string;
