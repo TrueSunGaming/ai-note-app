@@ -1,6 +1,7 @@
-import { type Readable, derived } from "svelte/store";
+import { type Readable, derived, readable } from "svelte/store";
 import type { BlockComponent } from "./BlockComponent";
 import type { DocumentSerializable } from "../DocumentSerializable";
+import { moveCaretToStart } from "$lib/util/caret/moveCaretToStart";
 import { v4 as uuidv4 } from "uuid";
 
 export abstract class BlockData implements DocumentSerializable {
@@ -20,6 +21,7 @@ export abstract class BlockData implements DocumentSerializable {
     protected abstract loadFromCheckedRaw(raw: object & Record<"type", typeof this.type>): void;
     abstract readonly raw: Readable<unknown>;
     abstract readonly markdown: Readable<string>;
+    readonly children: Readable<BlockData[]> = readable([]);
 
     cancelHistory = 0;
 
@@ -70,5 +72,11 @@ export abstract class BlockData implements DocumentSerializable {
 
     static fromJSON(json: string): BlockData | undefined {
         return BlockData.fromRaw(JSON.parse(json));
+    }
+
+    focus(): void {
+        const element = document.querySelector<HTMLElement>(`[data-uuid="${this.uuid}"]`);
+        if (!element) return;
+        moveCaretToStart(element);
     }
 }

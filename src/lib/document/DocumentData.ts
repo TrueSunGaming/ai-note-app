@@ -49,6 +49,15 @@ export class DocumentData implements DocumentSerializable {
         return derived(this.raw, (raw) => JSON.stringify(raw));
     }
 
+    get allBlocks(): Readable<BlockData[]> {
+        return derived(this.blocks, (blocks, set) => {
+            const childrenStores = blocks.map((b) => b.children);
+            const all = derived(childrenStores, (children) => [...blocks, ...children.flat()]);
+
+            all.subscribe(($children) => set($children));
+        });
+    }
+
     get markdown(): Readable<string> {
         return derived(
             [this.title, this.blocks],
@@ -97,7 +106,7 @@ export class DocumentData implements DocumentSerializable {
     }
 
     getBlockFromUUID(uuid: string): BlockData | undefined {
-        return get(this.blocks).find((b) => b.uuid == uuid);
+        return get(this.allBlocks).find((b) => b.uuid == uuid);
     }
 
     private static getBlockIndex(blocks: BlockData[], block: BlockData | number): number | null {

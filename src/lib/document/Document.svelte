@@ -1,6 +1,7 @@
 <script lang="ts">
     import Block from "./block/Block.svelte";
     import type { DocumentData } from "./DocumentData";
+    import DocumentInsertionArea from "./DocumentInsertionArea.svelte";
 
     interface Props {
         doc: DocumentData;
@@ -19,5 +20,14 @@
         {#each $blocks as blockData (blockData.uuid)}
             <Block {blockData} {doc} />
         {/each}
+
+        <DocumentInsertionArea {doc} />
     </div>
 </article>
+
+<style lang="scss">
+    article,
+    div {
+        height: 100%;
+    }
+</style>
