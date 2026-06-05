@@ -1,5 +1,6 @@
 <script lang="ts">
     import RichTextFeature from "./feature/RichTextFeature.svelte";
+    import RichTextLeaf from "./RichTextLeaf.svelte";
     import type { RichTextStructure } from "./RichTextStructure";
 
     interface Props {
@@ -17,7 +18,7 @@
 
 {#each children as child, idx (idx)}
     {#if typeof child == "string"}
-        <span data-richtext-idx-path={combinePaths(idxPath, idx)}>{child}</span>
+        <RichTextLeaf {children} index={idx} idxPath={combinePaths(idxPath, idx)} />
     {:else}
         <RichTextFeature
             tag={child.tag}

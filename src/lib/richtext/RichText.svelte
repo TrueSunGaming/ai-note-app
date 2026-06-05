@@ -1,10 +1,10 @@
 <script lang="ts">
     import "./feature/loadFeatures";
+    import { onMount, tick } from "svelte";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
     import { deletePath } from "./editor-util/path/deletePath";
     import { getTextAtPath } from "./editor-util/path/getTextAtPath";
-    import { onMount } from "svelte";
     import { setTextAtPath } from "./editor-util/path/setTextAtPath";
 
     interface Props {
@@ -12,11 +12,14 @@
     }
 
     let { raw = $bindable() }: Props = $props();
-
     let element: HTMLSpanElement | null = $state(null);
+    let cancelDOM = 0;
+    let observerDisabled = false;
+    let renderingRaw = $state("");
+    const structure = $derived(richTextToStructure(renderingRaw));
 
     function addCancelUpdate(): void {
-        cancelUpdates++;
+        cancelDOM++;
     }
 
     function updateRaw(): void {
@@ -37,27 +40,27 @@
         };
     });
 
-    let cancelUpdates = 0;
-    let renderingRaw = $state("");
-    const structure = $derived(richTextToStructure(renderingRaw));
-
     $effect(() => {
         const newRaw = raw; // force svelte to actually watch this
 
-        if (cancelUpdates > 0) {
-            cancelUpdates--;
+        if (cancelDOM > 0) {
+            cancelDOM--;
             return;
         }
 
-        renderingRaw = raw;
+        observerDisabled = true;
+        renderingRaw = newRaw;
+        tick().then(() => (observerDisabled = false));
     });
 
     function updateRawWithoutDOM(): void {
-        cancelUpdates++;
+        cancelDOM++;
         raw = stringifyRichTextStructure(structure);
     }
 
-    function handleAttributesMutation(mutation: MutationRecord): void {}
+    function handleAttributesMutation(mutation: MutationRecord): void {
+        if (mutation.attributeName == "data-richtext-raw") return updateRaw();
+    }
 
     function handleRemovedFilter(node: Node): boolean {
         if (node.nodeType == Node.COMMENT_NODE) return false;
@@ -135,6 +138,8 @@
     }
 
     const observer = new MutationObserver((mutations) => {
+        if (observerDisabled) return;
+
         for (const mutation of mutations) handleMutation(mutation);
     });
 
@@ -155,9 +160,3 @@
 <span bind:this={element} data-richtext-raw={raw}>
     <RichTextFeature {...structure} />
 </span>
-
-<style lang="scss">
-    span {
-        white-space: pre;
-    }
-</style>
