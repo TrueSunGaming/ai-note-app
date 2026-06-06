@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { BlockData } from "./block/BlockData";
-    import type { DocumentData } from "./DocumentData";
+    import { BlockData } from "../BlockData";
+    import type { DocumentData } from "../../DocumentData";
     import { moveCaretToStart } from "$lib/util/caret/moveCaretToStart";
     import { tick } from "svelte";
 

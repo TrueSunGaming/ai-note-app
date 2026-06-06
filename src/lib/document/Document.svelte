@@ -1,7 +1,7 @@
 <script lang="ts">
     import Block from "./block/Block.svelte";
     import type { DocumentData } from "./DocumentData";
-    import DocumentInsertionArea from "./DocumentInsertionArea.svelte";
+    import DocumentInsertionArea from "./block/text/DocumentInsertionArea.svelte";
     import RichTextContextMenu from "$lib/richtext/contextmenu/RichTextContextMenu.svelte";
 
     interface Props {
