@@ -9,15 +9,29 @@
     let anchorY: number | null = $state(null);
     let menuVisible = $derived(anchorX != null && anchorY != null);
 
+    function resetAnchor(): void {
+        anchorX = null;
+        anchorY = null;
+    }
+
+    function rangeIsValid(range: Range): boolean {
+        const checkElement =
+            range.commonAncestorContainer instanceof HTMLElement
+                ? range.commonAncestorContainer
+                : range.commonAncestorContainer.parentElement;
+
+        if (!checkElement?.closest("[data-text-block]")) return false;
+        return true;
+    }
+
     function onSelectionChange(): void {
         const selection = window.getSelection();
-        if (selection == null || selection.toString().length == 0) {
-            anchorX = null;
-            anchorY = null;
-            return;
-        }
+        if (selection == null || selection.isCollapsed || selection.rangeCount == 0)
+            return resetAnchor();
 
         const range = selection.getRangeAt(0);
+        if (!rangeIsValid(range)) return resetAnchor();
+
         const rect = range.getBoundingClientRect();
         anchorX = rect.left + rect.width / 2;
         anchorY = rect.bottom;

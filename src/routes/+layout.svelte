@@ -3,6 +3,7 @@
     import "$lib/style/colors.scss";
     import "$lib/style/global.scss";
     import "$lib/style/classes.scss";
+    import RichTextContextMenu from "$lib/richtext/contextmenu/RichTextContextMenu.svelte";
     import { onMount } from "svelte";
     import { rawPaste } from "$lib/util/rawPaste";
 
@@ -20,3 +21,5 @@
 <main>
     {@render children()}
 </main>
+
+<RichTextContextMenu />

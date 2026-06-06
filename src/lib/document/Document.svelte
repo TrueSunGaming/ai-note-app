@@ -2,7 +2,6 @@
     import Block from "./block/Block.svelte";
     import type { DocumentData } from "./DocumentData";
     import DocumentInsertionArea from "./block/text/DocumentInsertionArea.svelte";
-    import RichTextContextMenu from "$lib/richtext/contextmenu/RichTextContextMenu.svelte";
 
     interface Props {
         doc: DocumentData;
@@ -21,12 +20,10 @@
         {#each $blocks as blockData (blockData.uuid)}
             <Block {blockData} {doc} />
         {/each}
-
-        <DocumentInsertionArea {doc} />
     </div>
-</article>
 
-<RichTextContextMenu />
+    <DocumentInsertionArea {doc} />
+</article>
 
 <style lang="scss">
     article,

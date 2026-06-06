@@ -10,7 +10,7 @@
 </script>
 
 {#if $text !== undefined}
-    <p contenteditable data-uuid={blockData.uuid} use:events={doc}>
+    <p contenteditable data-text-block data-uuid={blockData.uuid} use:events={doc}>
         <RichText bind:raw={$text} />
     </p>
 {/if}
