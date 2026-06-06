@@ -2,6 +2,7 @@
     import "./feature/loadFeatures";
     import { onMount, tick } from "svelte";
     import { richTextToStructure, stringifyRichTextStructure } from "./RichTextStructure";
+    import RichTextContextMenu from "./contextmenu/RichTextContextMenu.svelte";
     import RichTextFeature from "./feature/RichTextFeature.svelte";
     import { deletePath } from "./editor-util/path/deletePath";
     import { getTextAtPath } from "./editor-util/path/getTextAtPath";
